@@ -1,0 +1,17 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>ファームウェアアップデート</h2>
+<div>
+    <p>この画面では、ファームウェア(MultiMasconのソフトウェア)を更新できます。<br>
+        以下の注意点をお読みになって、正しいファイルを選択して「ファームウェアを更新」ボタンを押してください</p>
+    <ul>
+        <li>アップロードには時間がかかることがあります。途中でリロード・画面を閉じないでください</li>
+        <li>アップロードが完了したら、アップデート準備を行います。完了画面に変わるまで、操作をしないでください</li>
+        <li>次回起動開始時に、アップデートが反映されます。次回起動時は、完了(正常動作開始)まで絶対に電源を抜かないでください</li>
+    </ul>
+    <form method="post" enctype='multipart/form-data'>
+        <input type='file' name='file' required>
+        <input type='submit' value='ファームウェアを更新'>
+    </form>
+</div>
+{% endblock %}

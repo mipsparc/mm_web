@@ -38,6 +38,7 @@ def upgrade():
         
         open(FIRMWARE_FILENAME, mode='wb').write(blob)
         Popen('sleep 5; reboot', shell=True)
+        flash('再起動を開始しました。起動完了するまで絶対にケーブルを抜かないでください')
         return redirect(url_for('upgrade_ready'))
 
 @app.route("/upgrade_ready")
@@ -55,7 +56,6 @@ def database():
             return redirect(url_for('database'))
         
         open(DATABASE_FILENAME, mode='wb').write(blob)
-        flash('データベースの更新が完了しました。すぐに再起動を行ってください')
         return redirect(url_for('database'))
     
 @app.route("/database/multimascon.sqlite3")
@@ -76,3 +76,17 @@ def log():
             log += open(filename).read().replace('\n', '<br>') + '<br>------------------------------------<br>'
         
     return render_template('log.html',  version=version.VERSION, log=Markup(log))
+
+@app.route("/power", methods=['GET', 'POST'])
+def power():
+    if request.method == 'GET':
+        return render_template('power.html', version=version.VERSION)
+    elif request.method == 'POST':
+        if request.form['power'] == 'shutdown':
+            Popen('sleep 5; shutdown -h now', shell=True)
+        elif request.form['power'] == 'reboot':
+            Popen('sleep 5; reboot', shell=True)
+        else:
+            return redirect(url_for('power'))
+        flash('終了手順が開始しました。シャットダウンの場合は、電源が完全に切れる(ランプが消灯する)まで絶対にケーブルを抜かないでください')
+        return redirect(url_for('power'))

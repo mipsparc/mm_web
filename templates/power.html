@@ -1,0 +1,14 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>電源操作(安全に電源を切る・再起動)</h2>
+<div>
+    <p>この画面では、安全に電源を切るか、再起動をすることができます。</p>
+    <div style="margin:30px">
+        <form method="post" enctype='multipart/form-data'>
+            <label><input type='radio' name='power' value='shutdown'>安全に電源を切る</label>
+            <label><input type='radio' name='power' value='reboot'>再起動する</label>
+            <input type='submit' value='実行する'>
+        </form>
+    <div>
+</div>
+{% endblock %}

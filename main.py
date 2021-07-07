@@ -5,6 +5,7 @@ import israspi
 import glob
 import datetime
 from subprocess import Popen
+import DB
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -38,7 +39,7 @@ def upgrade():
         
         open(FIRMWARE_FILENAME, mode='wb').write(blob)
         Popen('sleep 5; reboot', shell=True)
-        flash('再起動を開始しました。起動完了するまで絶対にケーブルを抜かないでください')
+        flash('再起動を開始しました。起動完了するまでケーブルを抜かないでください')
         return redirect(url_for('upgrade_ready'))
 
 @app.route("/upgrade_ready")
@@ -56,6 +57,7 @@ def database():
             return redirect(url_for('database'))
         
         open(DATABASE_FILENAME, mode='wb').write(blob)
+        flash('再起動を開始しました。起動完了するまでケーブルを抜かないでください')
         return redirect(url_for('database'))
     
 @app.route("/database/multimascon.sqlite3")
@@ -88,5 +90,5 @@ def power():
             Popen('sleep 5; reboot', shell=True)
         else:
             return redirect(url_for('power'))
-        flash('終了手順が開始しました。シャットダウンの場合は、電源が完全に切れる(ランプが消灯する)まで絶対にケーブルを抜かないでください')
+        flash('終了手順が開始しました。シャットダウンの場合は、電源がランプが消灯してから10秒経つまでケーブルを抜かないでください')
         return redirect(url_for('power'))

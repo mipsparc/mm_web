@@ -6,6 +6,7 @@ import glob
 import datetime
 from subprocess import Popen
 import DB
+import re
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -90,5 +91,21 @@ def power():
             Popen('sleep 5; reboot', shell=True)
         else:
             return redirect(url_for('power'))
+        
         flash('終了手順が開始しました。シャットダウンの場合は、電源がランプが消灯してから10秒経つまでケーブルを抜かないでください')
         return redirect(url_for('power'))
+    
+@app.route("/psk", methods=['GET', 'POST'])
+def psk():
+    if request.method == 'GET':
+        return render_template('psk.html', version=version.VERSION)
+    elif request.method == 'POST':
+        new_psk = request.form['psk']
+        p = re.compile('[a-zA-Z0-9]{8,62}')
+        if p.fullmatch(new_psk) is None:
+            flash('パスワードが不正です。変更が反映されませんでした')
+        else:
+            Popen(f'sed -i -e "s/^wpa_passphrase=.*/wpa_passphrase={new_psk}/" /mnt/database/hostapd.conf', shell=True)
+            flash('変更が完了しました。再起動(設定画面からも可能)後に反映されます。')
+
+        return redirect(url_for('psk'))

@@ -58,7 +58,7 @@ def database():
             return redirect(url_for('database'))
         
         open(DATABASE_FILENAME, mode='wb').write(blob)
-        flash('再起動を開始しました。起動完了するまでケーブルを抜かないでください')
+        flash('設定情報復元が完了しました')
         return redirect(url_for('database'))
     
 @app.route("/database/multimascon.sqlite3")
@@ -109,3 +109,14 @@ def psk():
             flash('変更が完了しました。再起動(設定画面からも可能)後に反映されます。')
 
         return redirect(url_for('psk'))
+    
+@app.route("/softreset", methods=['GET', 'POST'])
+def softreset():
+    if request.method == 'GET':
+        return render_template('softreset.html', version=version.VERSION)
+    elif request.method == 'POST':
+        with open('/tmp/webui_namedpipe', 'w') as fifo:
+            fifo.write('softreset\n')
+        flash('ソフトリセットが開始しました。しばらく経つとソフトウェアが再起動します')
+
+        return redirect(url_for('softreset'))

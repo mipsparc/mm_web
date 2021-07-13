@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, Response, 
 import version
 import os
 import israspi
-import glob
+import pathlib
 import datetime
 from subprocess import Popen
 import DB
 import re
+import time
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -16,13 +17,13 @@ app.secret_key = b'\xda\x90\x89lh\xdb\x80\xee"$\xa1#\xc4\'\xcc\xc6\xde|\x18~\xdc
 if israspi.is_raspi:
     FIRMWARE_FILENAME = '/mnt/rescue/new_firmware.tar.bz2'
     DATABASE_FILENAME = '/mnt/database/multimascon.sqlite3'
-    LOGS = '/mnt/database/log/*.txt'
+    LOG_DIR = '/mnt/database/log/'
 else:
     FIRMWARE_FILENAME = '/tmp/new_firmware.tar.bz2'
     # ホームディレクトリにsymlinkを置く
     from pathlib import Path
     DATABASE_FILENAME = str(Path.home()) + '/multimascon.sqlite3'
-    LOGS = './MultiMascon/log/*.txt'
+    LOG_DIR = './MultiMascon/log/'
 
 @app.route("/")
 def menu():
@@ -70,13 +71,12 @@ def database_download():
 def log():
     log = ''
     
-    log_files = glob.glob(LOGS)
-    if len(log_files) == 0:
+    log_filenums = sorted([int(p.stem) for p in pathlib.Path(LOG_DIR).iterdir()], reverse=True)
+    if log_filenums == []:
         log = '見つかりませんでした'
     else:
-        log_files.sort(reverse=True)
-        for filename in log_files:
-            log += open(filename).read().replace('\n', '<br>') + '<br>------------------------------------<br>'
+        for filenum in log_filenums:
+            log += f'<br>----------{filenum}----------<br>' + open(LOG_DIR + f'{filenum}.txt').read().replace('\n', '<br>')
         
     return render_template('log.html',  version=version.VERSION, log=Markup(log))
 
@@ -92,7 +92,7 @@ def power():
         else:
             return redirect(url_for('power'))
         
-        flash('終了手順が開始しました。シャットダウンの場合は、電源がランプが消灯してから10秒経つまでケーブルを抜かないでください')
+        flash('終了手順が開始しました。シャットダウンの場合は、ランプが消灯してから10秒経つまでケーブルを抜かないでください')
         return redirect(url_for('power'))
     
 @app.route("/psk", methods=['GET', 'POST'])
@@ -115,8 +115,11 @@ def softreset():
     if request.method == 'GET':
         return render_template('softreset.html', version=version.VERSION)
     elif request.method == 'POST':
-        with open('/tmp/webui_namedpipe', 'w') as fifo:
-            fifo.write('softreset\n')
-        flash('ソフトリセットが開始しました。しばらく経つとソフトウェアが再起動します')
+        #with open('/tmp/webui_namedpipe', 'w') as fifo:
+            #fifo.write('softreset\n')
+        Popen('pkill -9 -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
+        time.sleep(0.5)
+        Popen('python3 /mnt/multimascon/MultiMascon/main.py', shell=True)
+        flash('ソフトリセットが完了しました')
 
         return redirect(url_for('softreset'))

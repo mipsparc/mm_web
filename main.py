@@ -115,8 +115,6 @@ def softreset():
     if request.method == 'GET':
         return render_template('softreset.html', version=version.VERSION)
     elif request.method == 'POST':
-        #with open('/tmp/webui_namedpipe', 'w') as fifo:
-            #fifo.write('softreset\n')
         Popen('pkill -9 -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
         time.sleep(0.5)
         Popen('python3 /mnt/multimascon/MultiMascon/main.py', shell=True)

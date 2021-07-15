@@ -1,0 +1,27 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>車両設定</h2>
+<div>
+    <ul style="list-style:none;">
+        {% for loco in locos %}
+        <li style="background-color:#ffe8ff;margin-top:30px;max-width:500px;padding:10px;">
+            <form method="post">
+                {% if not loco.isnew %}
+                    車両番号(自動付番): {{ loco.loco_id|e }}<br>
+                {% endif %}
+                <input type="hidden" name="loco_id" value="{{ loco.loco_id|e }}">
+                <label>アドレス: <input type="number" name="address" size="8"  value="{{ loco.address|e }}" required></label><br>
+                <label>加速曲線番号: <input type="number" name="accel_curve_group_id" size="8"  value="{{ loco.accel_curve_group_id|e }}" required></label><br>
+                <label>速度曲線番号: <input type="number" name="speed_curve_group_id" size="8"  value="{{ loco.speed_curve_group_id|e }}" required></label><br>
+                <label>最低出力: <input type="number" name="base_level" size="8"  value="{{ loco.base_level|e }}" required></label><br>
+                <label>ライトファンクションID: <input type="number" name="light_func_id" size="8"  value="{{ loco.light_func_id|e }}" required></label><br>
+                <button type="submit" name="mode" value="save">保存</button>
+                {% if not loco.isnew %}
+                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
+                {% endif %}
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

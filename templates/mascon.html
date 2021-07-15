@@ -1,0 +1,29 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>マスコン割付設定</h2>
+<div>
+    <h3>現在のマスコン接続状況</h3>
+    <p>TODO: ここに現在の接続状況を表示する</p>
+
+    <h3>車両とマスコンの紐づけ</h3>
+    <p><a href="/loco">車両パラメータ</a>で設定した車両番号(DCCアドレスではありません)に対応するマスコンを割付ます。</p>
+    <p>USBで接続された物理的なポート番号を入力します。たとえば、2番ポートであれば「2」、2番ポートにつながったUSBハブの1番ポートに繋がっていれば「2/1」と入力します。</p>
+    <p>マスコン物理ポートはほかの車両と重複できません。</p>
+    <p>TODO: ここにいい感じの写真を入れてわかりやすくする</p>
+    <ul style="list-style:none;">
+        {% for mascon in mascons %}
+        <li style="background-color:#ffe8ff;margin-top:30px;max-width:500px;padding:10px;">
+            <form method="post">
+                <input type="hidden" name="mascon_assign_id" value="{{ mascon.id|e }}">
+                <label>車両番号: <input type="number" name="loco_id" pattern="[0-9]+" value="{{ mascon.loco_id|e }}" required></label><br>
+                <label>マスコン物理ポート(半角入力): <input type="text" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ mascon.mascon_pos|e }}" required></label><br>
+                <button type="submit" name="mode" value="save">保存</button>
+                {% if not mascon.isnew %}
+                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
+                {% endif %}
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

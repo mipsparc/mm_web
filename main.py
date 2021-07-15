@@ -4,8 +4,8 @@ import os
 import israspi
 import pathlib
 import datetime
-from subprocess import Popen
-import DB
+from subprocess import Popen, run
+from DB import DB
 import re
 import time
 
@@ -18,16 +18,68 @@ if israspi.is_raspi:
     FIRMWARE_FILENAME = '/mnt/rescue/new_firmware.tar.bz2'
     DATABASE_FILENAME = '/mnt/database/multimascon.sqlite3'
     LOG_DIR = '/mnt/database/log/'
-else:
-    FIRMWARE_FILENAME = '/tmp/new_firmware.tar.bz2'
-    # ホームディレクトリにsymlinkを置く
-    from pathlib import Path
-    DATABASE_FILENAME = str(Path.home()) + '/multimascon.sqlite3'
-    LOG_DIR = './MultiMascon/log/'
 
 @app.route("/")
 def menu():
     return render_template('menu.html', version=version.VERSION, menu=True)
+
+@app.route("/loco", methods=['GET', 'POST'])
+def loco():
+    if request.method == 'GET':
+        locos = DB.getAllLocos()
+        # 新規登録用
+        locos.append({'loco_id': -1, 'isnew': True})
+        return render_template('loco.html', version=version.VERSION, locos=locos)
+    
+    elif request.method == 'POST':
+        if request.form['mode'] == 'del':
+            loco_id = int(request.form['loco_id'])
+            if loco_id >= 0:
+                DB.deleteLoco(str(loco_id))
+        elif request.form['mode'] == 'save':
+            loco_id = int(request.form['loco_id'])
+            address = int(request.form['address'])
+            accel_curve_group_id = int(request.form['accel_curve_group_id'])
+            speed_curve_group_id = int(request.form['speed_curve_group_id'])
+            base_level = int(request.form['base_level'])
+            light_func_id = int(request.form['light_func_id'])
+            
+            # 条件はしっかり
+            if address > 0 and accel_curve_group_id > 0 and speed_curve_group_id > 0 \
+                and base_level >= 0 and light_func_id >= 0:
+                if loco_id < 0:
+                    DB.insertLoco(str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id))
+                else:
+                    DB.updateLoco(str(loco_id), str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id))
+                
+        return redirect(url_for('loco'))
+
+@app.route("/mascon", methods=['GET', 'POST'])
+def mascon():
+    if request.method == 'GET':
+        mascon_assigns = DB.getAllMasconPos()
+        # 新規登録用
+        mascon_assigns.append({'id': -1, 'loco_id': '', 'mascon_pos': '', 'isnew': True})
+        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns)
+    
+    elif request.method == 'POST':
+        if request.form['mode'] == 'del':
+            mascon_assign_id = int(request.form['mascon_assign_id'])
+            if mascon_assign_id > 0:
+                DB.deleteMasconPos(str(mascon_assign_id))
+        elif request.form['mode'] == 'save':
+            mascon_assign_id = int(request.form['mascon_assign_id'])
+            loco_id = int(request.form['loco_id'])
+            mascon_pos = request.form['mascon_pos']
+            p = re.compile('([0-9]+/?){1,8}')
+            if loco_id > 0 and p.fullmatch(mascon_pos) is not None:
+                if mascon_assign_id < 0:
+                    DB.upsertMasconPos(str(loco_id), mascon_pos)
+                # すでにレコードがある場合は、それを上書きする
+                elif DB.isMasconAssignIdExist(str(mascon_assign_id)) is not None:
+                    DB.updateMasconPos(str(mascon_assign_id), str(loco_id), mascon_pos)
+                
+        return redirect(url_for('mascon'))
 
 @app.route("/upgrade", methods=['GET', 'POST'])
 def upgrade():
@@ -39,9 +91,11 @@ def upgrade():
         if len(blob) < 100:
             return redirect(url_for('upgrade'))
         
+        run('mount -t vfat -o rw /dev/mmcblk0p6 /mnt/rescue', shell=True)
         open(FIRMWARE_FILENAME, mode='wb').write(blob)
-        Popen('sleep 5; reboot', shell=True)
-        flash('再起動を開始しました。起動完了するまでケーブルを抜かないでください')
+        run('umount /mnt/rescue', shell=True)
+        Popen('sleep 3; reboot', shell=True)
+        flash('再起動を開始しました。起動完了するまで電源ケーブルを抜かないでください')
         return redirect(url_for('upgrade_ready'))
 
 @app.route("/upgrade_ready")
@@ -86,9 +140,9 @@ def power():
         return render_template('power.html', version=version.VERSION)
     elif request.method == 'POST':
         if request.form['power'] == 'shutdown':
-            Popen('sleep 5; shutdown -h now', shell=True)
+            Popen('sleep 3; shutdown -h now', shell=True)
         elif request.form['power'] == 'reboot':
-            Popen('sleep 5; reboot', shell=True)
+            Popen('sleep 3; reboot', shell=True)
         else:
             return redirect(url_for('power'))
         
@@ -105,7 +159,7 @@ def psk():
         if p.fullmatch(new_psk) is None:
             flash('パスワードが不正です。変更が反映されませんでした')
         else:
-            Popen(f'sed -i -e "s/^wpa_passphrase=.*/wpa_passphrase={new_psk}/" /mnt/database/hostapd.conf', shell=True)
+            run(f'sed -i -e "s/^wpa_passphrase=.*/wpa_passphrase={new_psk}/" /mnt/database/hostapd.conf', shell=True)
             flash('変更が完了しました。再起動(設定画面からも可能)後に反映されます。')
 
         return redirect(url_for('psk'))
@@ -115,8 +169,7 @@ def softreset():
     if request.method == 'GET':
         return render_template('softreset.html', version=version.VERSION)
     elif request.method == 'POST':
-        Popen('pkill -9 -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
-        time.sleep(0.5)
+        run('pkill -9 -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
         Popen('python3 /mnt/multimascon/MultiMascon/main.py', shell=True)
         flash('ソフトリセットが完了しました')
 

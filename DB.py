@@ -93,7 +93,7 @@ class DB:
         con.row_factory = self.dict_factory
         cur = con.cursor()
         cur.execute('''
-            SELECT loco_id, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id
+            SELECT loco_id, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio
             FROM loco
             ORDER BY address ASC
         ''', ())
@@ -114,25 +114,27 @@ class DB:
         con.close()
     
     @classmethod
-    def insertLoco(self, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id):
+    def insertLoco(self, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio):
         con = sqlite3.connect(self.dbfile)
         cur = con.cursor()
         cur.execute('''
             INSERT INTO loco
-            (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id)
-            VALUES (?, ?, ?, ?, ?)
+            (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (address)
             DO UPDATE
             SET accel_curve_group_id = excluded.accel_curve_group_id,
             speed_curve_group_id = excluded.speed_curve_group_id,
             base_level = excluded.base_level,
-            light_func_id = excluded.light_func_id
-        ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id))
+            light_func_id = excluded.light_func_id,
+            nickname = excluded.nickname
+            brake_ratio = excluded.brake_ratio
+        ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio))
         con.commit()
         con.close()
         
     @classmethod
-    def updateLoco(self, loco_id, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id):
+    def updateLoco(self, loco_id, address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio):
         con = sqlite3.connect(self.dbfile)
         cur = con.cursor()
         cur.execute('''
@@ -141,9 +143,11 @@ class DB:
             accel_curve_group_id = ?,
             speed_curve_group_id = ?,
             base_level = ?,
-            light_func_id = ?
+            light_func_id = ?,
+            nickname = ?,
+            brake_ratio = ?
             WHERE loco_id = ?
-        ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, loco_id))
+        ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio, loco_id))
         con.commit()
         con.close()
         

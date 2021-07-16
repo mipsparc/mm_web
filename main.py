@@ -44,14 +44,16 @@ def loco():
             speed_curve_group_id = int(request.form['speed_curve_group_id'])
             base_level = int(request.form['base_level'])
             light_func_id = int(request.form['light_func_id'])
+            nickname = request.form['nickname']
+            brake_ratio = float(request.form['brake_ratio'])
             
             # 条件はしっかり
             if address > 0 and accel_curve_group_id > 0 and speed_curve_group_id > 0 \
-                and base_level >= 0 and light_func_id >= 0:
+                and base_level >= 0 and light_func_id >= 0 and brake_ratio > 0:
                 if loco_id < 0:
-                    DB.insertLoco(str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id))
+                    DB.insertLoco(str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id), nickname, str(brake_ratio))
                 else:
-                    DB.updateLoco(str(loco_id), str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id))
+                    DB.updateLoco(str(loco_id), str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id), nickname, str(brake_ratio))
                 
         return redirect(url_for('loco'))
 

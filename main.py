@@ -67,7 +67,7 @@ def mascon():
                 # 例: 
                 # - 1(1番ポートに接続)
                 # - 2/1(2番ポートに接続されたハブの1番ポートに接続)
-                path = devpath.split("/usb")[1]
+                path = device.sys_path.split("/usb")[1]
                 path = path.split(":")[0]
                 path = path.split("/")[-1]
                 path = path.replace("-", "/")
@@ -80,7 +80,7 @@ def mascon():
         mascon_assigns = DB.getAllMasconPos()
         # 新規登録用
         mascon_assigns.append({'id': -1, 'loco_id': '', 'mascon_pos': '', 'isnew': True})
-        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns, ports=ports)
+        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns, ports=list(set(ports)))
     
     elif request.method == 'POST':
         if request.form['mode'] == 'del':

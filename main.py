@@ -8,6 +8,7 @@ from subprocess import Popen, run
 from DB import DB
 import re
 import time
+import pyudev
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -57,10 +58,29 @@ def loco():
 @app.route("/mascon", methods=['GET', 'POST'])
 def mascon():
     if request.method == 'GET':
+        # 現在接続されているポートの一覧
+        ports = []
+        context = pyudev.Context()
+        for device in context.list_devices():
+            if '/usb' in device.sys_path:
+                # 物理接続位置を取得する
+                # 例: 
+                # - 1(1番ポートに接続)
+                # - 2/1(2番ポートに接続されたハブの1番ポートに接続)
+                path = devpath.split("/usb")[1]
+                path = path.split(":")[0]
+                path = path.split("/")[-1]
+                path = path.replace("-", "/")
+                path = path.replace(".", "/")
+                path = path[4:]
+                if path == '':
+                    continue
+                ports.append(path)
+    
         mascon_assigns = DB.getAllMasconPos()
         # 新規登録用
         mascon_assigns.append({'id': -1, 'loco_id': '', 'mascon_pos': '', 'isnew': True})
-        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns)
+        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns, ports=ports)
     
     elif request.method == 'POST':
         if request.form['mode'] == 'del':

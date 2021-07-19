@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.secret_key = b'\xda\x90\x89lh\xdb\x80\xee"$\xa1#\xc4\'\xcc\xc6\xde|\x18~\xdc\x86\x14\xa6'
 
 if israspi.is_raspi:
-    FIRMWARE_FILENAME = '/mnt/rescue/new_firmware.tar.bz2'
+    FIRMWARE_FILENAME = '/mnt/rescue/MultiMasconUpdate.img'
     DATABASE_FILENAME = '/mnt/database/multimascon.sqlite3'
     LOG_DIR = '/mnt/database/log/'
 

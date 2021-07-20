@@ -158,7 +158,7 @@ class DB:
         con.row_factory = self.dict_factory
         cur = con.cursor()
         cur.execute('''
-            SELECT curve_group_id, speed, accel
+            SELECT curve_id, curve_group_id, speed, accel
             FROM speed_accel_curve
             ORDER BY speed ASC
         ''', ())
@@ -174,5 +174,65 @@ class DB:
         con.close()
         return curve_groups
     
+    @classmethod
+    def upsertAccelSpeed(self, curve_group_id, speed, accel):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO speed_accel_curve
+            (curve_group_id, speed, accel)
+            VALUES (?, ?, ?)
+            ON CONFLICT (curve_group_id, speed)
+            DO UPDATE
+            SET accel = excluded.accel
+        ''', (curve_group_id, speed, accel))
+        con.commit()
+        con.close()
     
+    @classmethod
+    def updateAccelSpeed(self, curve_id, speed, accel):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            UPDATE OR IGNORE speed_accel_curve
+            SET speed = ?, accel = ?
+            WHERE curve_id = ?
+        ''', (speed, accel, curve_id))
+        con.commit()
+        con.close()
     
+    @classmethod
+    def deleteAccelSpeed(self, curve_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM speed_accel_curve
+            WHERE curve_id = ?
+        ''', (curve_id, ))
+        con.commit()
+        con.close()
+
+    @classmethod
+    def deleteAccelSpeedGroup(self, curve_group_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM speed_accel_curve
+            WHERE curve_group_id = ?
+        ''', (curve_group_id, ))
+        con.commit()
+        con.close()
+
+    @classmethod
+    def createAccelSpeedGroup(self, new_curve_group_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO speed_accel_curve
+            (curve_group_id, speed, accel)
+            VALUES
+            (?, 0, 0.3),
+            (?, 100, 0.0)
+        ''', (new_curve_group_id, new_curve_group_id))
+        con.commit()
+        con.close()

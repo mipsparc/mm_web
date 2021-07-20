@@ -103,28 +103,46 @@ def mascon():
                     DB.updateMasconPos(str(mascon_assign_id), str(loco_id), mascon_pos)
                 
         return redirect(url_for('mascon'))
-    
+
 @app.route("/accel_speed", methods=['GET', 'POST'])
 def accel_speed():
     if request.method == 'GET':
-        profiles = []
         curve_groups = DB.getAllSpeedAccelCurve()
-        for curve_group_id, curves in curve_groups.items():
-            profile = []
-            for curve in curves:
-                profile.append(curve['speed'])
-                profile.append(curve['accel'])
-            profiles.append([curve_group_id, profile])
-        # 末尾のは表示しない
-        for i, profile in enumerate(profiles):
-            profiles[i] = [profiles[i][0], profiles[i][1][:-2]]
-            
-        print(profiles)
-            
+        profiles = Chart.genProfileFromCurveGroups(curve_groups)
         svg = Chart.createSpeedAccel(profiles)
-        return render_template('curve.html', version=version.VERSION, mode='加速曲線', chart_img=svg)
+        
+        # 新規登録用
+        for k in curve_groups.keys():
+            curve_groups[k].append({'curve_group_id': curve_groups[k][0]['curve_group_id'], 'curve_id': -1, 'isnew': True})
+        return render_template('accel_speed.html', version=version.VERSION, chart_img=svg, curve_groups=curve_groups)
     elif request.method == 'POST':
-        pass
+        if request.form['mode'] == 'del':
+            curve_id = int(request.form['curve_id'])
+            if curve_id > 0:
+                DB.deleteAccelSpeed(str(curve_id))
+        elif request.form['mode'] == 'save':
+            curve_group_id = int(request.form['curve_group_id'])
+            curve_id = int(request.form['curve_id'])
+            speed = int(request.form['speed'])
+            accel = float(request.form['accel'])
+            if curve_group_id > 0 and speed >= 0 and accel >= 0:
+                # 新規追加
+                if curve_id < 0:
+                    DB.upsertAccelSpeed(str(curve_group_id), str(speed), str(accel))
+                # すでにレコードがある場合は、それを上書きする
+                else:
+                    DB.updateAccelSpeed(str(curve_id), str(speed), str(accel))
+        elif request.form['mode'] == 'delGroup':
+            curve_group_id = int(request.form['curve_group_id'])
+            if curve_group_id > 0:
+                DB.deleteAccelSpeedGroup(str(curve_group_id))
+                
+        elif request.form['mode'] == 'new':
+            curve_groups = DB.getAllSpeedAccelCurve()
+            new_curve_group_id = max(curve_groups.keys()) + 1
+            DB.createAccelSpeedGroup(new_curve_group_id)
+
+        return redirect(url_for('accel_speed'))
 
 @app.route("/upgrade", methods=['GET', 'POST'])
 def upgrade():

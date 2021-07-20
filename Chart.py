@@ -35,3 +35,15 @@ class Chart:
             })
         
         return g.burn()
+
+    @classmethod
+    def genProfileFromCurveGroups(self, curve_groups):
+        profiles = []
+        for curve_group_id, curves in curve_groups.items():
+            profile = []
+            for curve in curves:
+                profile.append(curve['speed'])
+                profile.append(curve['accel'])
+            profiles.append([curve_group_id, profile])
+            
+        return profiles

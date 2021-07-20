@@ -151,3 +151,28 @@ class DB:
         con.commit()
         con.close()
         
+    # {1: [{curve_group_id: 1, speed: ...の形式
+    @classmethod
+    def getAllSpeedAccelCurve(self):
+        con = sqlite3.connect(self.dbfile)
+        con.row_factory = self.dict_factory
+        cur = con.cursor()
+        cur.execute('''
+            SELECT curve_group_id, speed, accel
+            FROM speed_accel_curve
+            ORDER BY speed ASC
+        ''', ())
+    
+        results = cur.fetchall()
+        curve_groups = {}
+        for result in results:
+            if result['curve_group_id'] in curve_groups:
+                curve_groups[result['curve_group_id']].append(result)
+            else:
+                curve_groups[result['curve_group_id']] = [result, ]
+                
+        con.close()
+        return curve_groups
+    
+    
+    

@@ -9,6 +9,7 @@ from DB import DB
 import re
 import time
 import pyudev
+from Chart import Chart
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -102,6 +103,28 @@ def mascon():
                     DB.updateMasconPos(str(mascon_assign_id), str(loco_id), mascon_pos)
                 
         return redirect(url_for('mascon'))
+    
+@app.route("/accel_speed", methods=['GET', 'POST'])
+def accel_speed():
+    if request.method == 'GET':
+        profiles = []
+        curve_groups = DB.getAllSpeedAccelCurve()
+        for curve_group_id, curves in curve_groups.items():
+            profile = []
+            for curve in curves:
+                profile.append(curve['speed'])
+                profile.append(curve['accel'])
+            profiles.append([curve_group_id, profile])
+        # 末尾のは表示しない
+        for i, profile in enumerate(profiles):
+            profiles[i] = [profiles[i][0], profiles[i][1][:-2]]
+            
+        print(profiles)
+            
+        svg = Chart.createSpeedAccel(profiles)
+        return render_template('curve.html', version=version.VERSION, mode='加速曲線', chart_img=svg)
+    elif request.method == 'POST':
+        pass
 
 @app.route("/upgrade", methods=['GET', 'POST'])
 def upgrade():

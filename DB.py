@@ -16,6 +16,10 @@ class DB:
             d[col[0]] = row[idx]
         return d
 
+    #
+    # マスコン割付設定画面
+    #
+
     @classmethod
     def getAllMasconPos(self):
         con = sqlite3.connect(self.dbfile)
@@ -87,6 +91,10 @@ class DB:
         
         return existence
     
+    #
+    # 車両設定画面
+    #
+    
     @classmethod
     def getAllLocos(self):
         con = sqlite3.connect(self.dbfile)
@@ -150,7 +158,11 @@ class DB:
         ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio, loco_id))
         con.commit()
         con.close()
-        
+
+    #
+    # 加速曲線編集画面
+    #
+
     # {1: [{curve_group_id: 1, speed: ...の形式
     @classmethod
     def getAllSpeedAccelCurve(self):
@@ -233,6 +245,94 @@ class DB:
             VALUES
             (?, 0, 0.3),
             (?, 100, 0.0)
+        ''', (new_curve_group_id, new_curve_group_id))
+        con.commit()
+        con.close()
+        
+    #
+    # 出力曲線編集画面
+    #
+    @classmethod
+    def getAllSpeedOutputCurve(self):
+        con = sqlite3.connect(self.dbfile)
+        con.row_factory = self.dict_factory
+        cur = con.cursor()
+        cur.execute('''
+            SELECT curve_id, curve_group_id, speed, output
+            FROM speed_output_curve
+            ORDER BY speed ASC
+        ''', ())
+    
+        results = cur.fetchall()
+        curve_groups = {}
+        for result in results:
+            if result['curve_group_id'] in curve_groups:
+                curve_groups[result['curve_group_id']].append(result)
+            else:
+                curve_groups[result['curve_group_id']] = [result, ]
+                
+        con.close()
+        return curve_groups
+    
+    @classmethod
+    def upsertOutputSpeed(self, curve_group_id, speed, output):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO speed_output_curve
+            (curve_group_id, speed, output)
+            VALUES (?, ?, ?)
+            ON CONFLICT (curve_group_id, speed)
+            DO UPDATE
+            SET output = excluded.output
+        ''', (curve_group_id, speed, output))
+        con.commit()
+        con.close()
+    
+    @classmethod
+    def updateOutputSpeed(self, curve_id, speed, output):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            UPDATE OR IGNORE speed_output_curve
+            SET speed = ?, output = ?
+            WHERE curve_id = ?
+        ''', (speed, output, curve_id))
+        con.commit()
+        con.close()
+    
+    @classmethod
+    def deleteOutputSpeed(self, curve_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM speed_output_curve
+            WHERE curve_id = ?
+        ''', (curve_id, ))
+        con.commit()
+        con.close()
+
+    @classmethod
+    def deleteOutputSpeedGroup(self, curve_group_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM speed_output_curve
+            WHERE curve_group_id = ?
+        ''', (curve_group_id, ))
+        con.commit()
+        con.close()
+
+    @classmethod
+    def createOutputSpeedGroup(self, new_curve_group_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO speed_output_curve
+            (curve_group_id, speed, output)
+            VALUES
+            (?, 0, 0),
+            (?, 100, 500)
         ''', (new_curve_group_id, new_curve_group_id))
         con.commit()
         con.close()

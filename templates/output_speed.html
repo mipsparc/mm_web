@@ -1,0 +1,38 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>出力曲線編集</h2>
+<div>
+    <p>ここでは、どの速度のときにどの出力値を指令するかを設定・確認できます。</p>
+    
+    <div>
+        <form method="post">
+            <button type="submit" name="mode" value="new">出力曲線を新規作成する</button>
+        </form>
+    </div>
+    
+    {% for curve_group_id, curve_group in curve_groups.items() %}
+    <ul style="background-color:#ffe8ff;list-style:none;padding:10px;max-width:600px">
+        <p>出力曲線番号{{ curve_group_id|e }}
+        <form method="post">
+            <input type="hidden" name="curve_group_id" value="{{ curve_group_id|e }}">
+            <button type="submit" name="mode" value="delGroup" onclick="return confirm('本当に削除しますか')">出力曲線を削除する</button>
+        </form>
+        {% for curve in curve_group %}
+        <li>
+            <form method="post">
+                <input type="hidden" name="curve_id" value="{{ curve.curve_id|e }}">
+                <input type="hidden" name="curve_group_id" value="{{ curve.curve_group_id|e }}">
+                <label>速度: <input type="number" name="speed" pattern="[0-9]+" value="{{ curve.speed|e }}" required></label>
+                <label style="padding-left:20px;">出力値: <input type="number" name="output" size="5"  value="{{ curve.output|e }}" required></label>
+                <button type="submit" name="mode" value="save">保存</button>
+                {% if not curve.isnew %}
+                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
+                {% endif %}
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+    {{ chart_img | safe }}
+</div>
+{% endblock %}

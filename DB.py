@@ -172,10 +172,12 @@ class DB:
         cur.execute('''
             SELECT curve_id, curve_group_id, speed, accel
             FROM speed_accel_curve
-            ORDER BY speed ASC
+            ORDER BY curve_group_id ASC, speed ASC
         ''', ())
     
         results = cur.fetchall()
+        con.close()
+
         curve_groups = {}
         for result in results:
             if result['curve_group_id'] in curve_groups:
@@ -183,7 +185,8 @@ class DB:
             else:
                 curve_groups[result['curve_group_id']] = [result, ]
                 
-        con.close()
+        curve_groups = sorted(curve_groups.items())
+                
         return curve_groups
     
     @classmethod
@@ -260,18 +263,21 @@ class DB:
         cur.execute('''
             SELECT curve_id, curve_group_id, speed, output
             FROM speed_output_curve
-            ORDER BY speed ASC
+            ORDER BY curve_group_id ASC, speed ASC
         ''', ())
     
         results = cur.fetchall()
+        con.close()
+        
         curve_groups = {}
         for result in results:
             if result['curve_group_id'] in curve_groups:
                 curve_groups[result['curve_group_id']].append(result)
             else:
                 curve_groups[result['curve_group_id']] = [result, ]
-                
-        con.close()
+        
+        print(curve_groups)
+        
         return curve_groups
     
     @classmethod

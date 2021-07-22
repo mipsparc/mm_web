@@ -108,12 +108,14 @@ def mascon():
 def accel_speed():
     if request.method == 'GET':
         curve_groups = DB.getAllSpeedAccelCurve()
-        profiles = Chart.genAccelProfileFromCurveGroups(curve_groups)
-        svg = Chart.createSpeedAccel(profiles)
-        
-        # 新規登録用
-        for k in curve_groups.keys():
-            curve_groups[k].append({'curve_group_id': curve_groups[k][0]['curve_group_id'], 'curve_id': -1, 'isnew': True})
+        svg = ''
+        if curve_groups != {}:
+            profiles = Chart.genAccelProfileFromCurveGroups(curve_groups)
+            svg = Chart.createSpeedAccel(profiles)
+            
+            # 新規登録用
+            for k in curve_groups.keys():
+                curve_groups[k].append({'curve_group_id': curve_groups[k][0]['curve_group_id'], 'curve_id': -1, 'isnew': True})
         return render_template('accel_speed.html', version=version.VERSION, chart_img=svg, curve_groups=curve_groups)
     elif request.method == 'POST':
         if request.form['mode'] == 'del':
@@ -139,7 +141,10 @@ def accel_speed():
                 
         elif request.form['mode'] == 'new':
             curve_groups = DB.getAllSpeedAccelCurve()
-            new_curve_group_id = max(curve_groups.keys()) + 1
+            if curve_groups == {}:
+                new_curve_group_id = 1
+            else:
+                new_curve_group_id = max(curve_groups.keys()) + 1
             DB.createAccelSpeedGroup(new_curve_group_id)
 
         return redirect(url_for('accel_speed'))
@@ -148,18 +153,20 @@ def accel_speed():
 def output_speed():
     if request.method == 'GET':
         curve_groups = DB.getAllSpeedOutputCurve()
-        profiles = Chart.genOutputProfileFromCurveGroups(curve_groups)
-        svg = Chart.createSpeedOutput(profiles)
+        svg = ''
+        if curve_groups != {}:
+            profiles = Chart.genOutputProfileFromCurveGroups(curve_groups)
+            svg = Chart.createSpeedOutput(profiles)
         
-        # 新規登録用
-        for k in curve_groups.keys():
-            curve_groups[k].append({'curve_group_id': curve_groups[k][0]['curve_group_id'], 'curve_id': -1, 'isnew': True})
+            # 新規登録用
+            for k in curve_groups.keys():
+                curve_groups[k].append({'curve_group_id': curve_groups[k][0]['curve_group_id'], 'curve_id': -1, 'isnew': True})
         return render_template('output_speed.html', version=version.VERSION, chart_img=svg, curve_groups=curve_groups)
     elif request.method == 'POST':
         if request.form['mode'] == 'del':
             curve_id = int(request.form['curve_id'])
             if curve_id > 0:
-                DB.deleteAccelSpeed(str(curve_id))
+                DB.deleteOutputSpeed(str(curve_id))
         elif request.form['mode'] == 'save':
             curve_group_id = int(request.form['curve_group_id'])
             curve_id = int(request.form['curve_id'])
@@ -179,7 +186,10 @@ def output_speed():
                 
         elif request.form['mode'] == 'new':
             curve_groups = DB.getAllSpeedOutputCurve()
-            new_curve_group_id = max(curve_groups.keys()) + 1
+            if curve_groups == {}:
+                new_curve_group_id = 1
+            else:
+                new_curve_group_id = max(curve_groups.keys()) + 1
             DB.createOutputSpeedGroup(new_curve_group_id)
 
         return redirect(url_for('output_speed'))

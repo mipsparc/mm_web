@@ -135,7 +135,7 @@ class DB:
             speed_curve_group_id = excluded.speed_curve_group_id,
             base_level = excluded.base_level,
             light_func_id = excluded.light_func_id,
-            nickname = excluded.nickname
+            nickname = excluded.nickname,
             brake_ratio = excluded.brake_ratio
         ''', (address, accel_curve_group_id, speed_curve_group_id, base_level, light_func_id, nickname, brake_ratio))
         con.commit()

@@ -1,0 +1,38 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>ボタン設定</h2>
+<div>
+    <p>マスコンの各ボタンに機能を割り付けます</p>
+    <ul style="list-style:none;">
+        {% for button in buttons %}
+        <li style="background-color:#ffe8ff;margin-top:30px;max-width:500px;padding:10px;">
+            <form method="post">
+                <input type="hidden" name="button_assign_id" value="{{ button.button_assign_id|e }}">
+                <label>マスコン物理ポート(半角入力): <input type="text" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ button.mascon_pos|e }}" required></label><br>
+                <label>ボタン: 
+                    <select name="button_id">
+                        {% for button_id, desc in button_types.items() %}
+                            <option value="{{ button_id }}" {% if button_id == button.button_id %}selected{% endif %}>{{ desc|e }}</option>
+                        {% endfor %}
+                    </select>
+                </label><br>
+                <label>割当モード: 
+                    <select name="assign_type">
+                        {% for assign_type, desc in assign_types.items() %}
+                            <option value="{{ assign_type }}" {% if assign_type == button.assign_type %}selected{% endif %}>{{ desc|e }}</option>
+                        {% endfor %}
+                    </select>
+                </label><br>
+                <label>ファンクションIDまたはアドレス: <input type="number" name="send_key" pattern="[0-9]+" value="{{ button.send_key|e }}" required></label><br>
+                <label>送信データ(ON/OFFの場合は0を入力): <input type="number" name="send_value" pattern="[0-9]+" value="{{ button.send_value|e }}" required></label><br>
+
+                <button type="submit" name="mode" value="save">保存</button>
+                {% if not button.isnew %}
+                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
+                {% endif %}
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

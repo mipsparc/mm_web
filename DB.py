@@ -184,9 +184,7 @@ class DB:
                 curve_groups[result['curve_group_id']].append(result)
             else:
                 curve_groups[result['curve_group_id']] = [result, ]
-                
-        curve_groups = sorted(curve_groups.items())
-                
+
         return curve_groups
     
     @classmethod
@@ -275,9 +273,7 @@ class DB:
                 curve_groups[result['curve_group_id']].append(result)
             else:
                 curve_groups[result['curve_group_id']] = [result, ]
-        
-        print(curve_groups)
-        
+
         return curve_groups
     
     @classmethod
@@ -342,3 +338,57 @@ class DB:
         ''', (new_curve_group_id, new_curve_group_id))
         con.commit()
         con.close()
+        
+        
+    #
+    # ボタン編集画面
+    #
+    @classmethod
+    def getAllButtons(self):
+        con = sqlite3.connect(self.dbfile)
+        con.row_factory = self.dict_factory
+        cur = con.cursor()
+        cur.execute('''
+            SELECT button_assign_id, mascon_pos, button_id, assign_type, send_key, send_value
+            FROM button_assign
+        ''', ())
+        button_profile = cur.fetchall()
+        con.close()
+        
+        return button_profile
+    
+    @classmethod
+    def deleteButton(self, button_assign_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM button_assign
+            WHERE button_assign_id = ?
+        ''', (button_assign_id, ))
+        con.commit()
+        con.close()
+
+    @classmethod
+    def upsertButton(self, mascon_pos, button_id, assign_type, send_key, send_value):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO button_assign
+            (mascon_pos, button_id, assign_type, send_key, send_value)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (mascon_pos, button_id, assign_type, send_key, send_value))
+        con.commit()
+        con.close()
+    
+    @classmethod
+    def updateButton(self, assign_id, mascon_pos, button_id, assign_type, send_key, send_value):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            UPDATE OR IGNORE button_assign
+            SET mascon_pos = ?, button_id = ?, assign_type = ?, send_key = ?, send_value = ?
+            WHERE button_assign_id = ?
+        ''', (mascon_pos, button_id, assign_type, send_key, send_value, assign_id))
+        con.commit()
+        con.close()
+

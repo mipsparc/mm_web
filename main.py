@@ -10,6 +10,9 @@ import re
 import time
 import pyudev
 from Chart import Chart
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../MultiMascon/'))
+from Button import Button
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -103,6 +106,40 @@ def mascon():
                     DB.updateMasconPos(str(mascon_assign_id), str(loco_id), mascon_pos)
                 
         return redirect(url_for('mascon'))
+
+@app.route("/button", methods=['GET', 'POST'])
+def button():
+    if request.method == 'GET':
+        buttons = DB.getAllButtons()
+        
+        # 新規登録用
+        buttons.append({'button_assign_id': -1, 'isnew': True})
+        assign_types = {-1: '選択してください'}
+        assign_types.update(Button.ASSIGN_TYPES)
+        return render_template('button.html', version=version.VERSION, buttons=buttons, button_types=Button.BUTTONS, assign_types=assign_types)
+    
+    elif request.method == 'POST':        
+        if request.form['mode'] == 'del':
+            assign_id = int(request.form['assign_id'])
+            if assign_id >= 0:
+                DB.deleteButton(str(assign_id))
+        elif request.form['mode'] == 'save':
+            assign_id = int(request.form['button_assign_id'])
+            mascon_pos = request.form['mascon_pos']
+            button_id = int(request.form['button_id'])
+            assign_type = int(request.form['assign_type'])
+            send_key = int(request.form['send_key'])
+            send_value = int(request.form['send_value'])
+            
+            p = re.compile('([0-9]+/?){1,8}')
+            if p.fullmatch(mascon_pos) is not None and button_id in Button.BUTTONS.keys() \
+                and assign_type in Button.ASSIGN_TYPES.keys() and send_key >= 0 and send_value >= 0:
+                if assign_id < 0:
+                    DB.upsertButton(str(mascon_pos), str(button_id), str(assign_type), str(send_key), send_value)
+                else:
+                    DB.updateButton(str(assign_id), str(mascon_pos), str(button_id), str(assign_type), str(send_key), send_value)
+                
+        return redirect(url_for('button'))
 
 @app.route("/accel_speed", methods=['GET', 'POST'])
 def accel_speed():
@@ -282,7 +319,7 @@ def softreset():
     if request.method == 'GET':
         return render_template('softreset.html', version=version.VERSION)
     elif request.method == 'POST':
-        run('pkill -9 -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
+        run('pkill -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
         Popen('python3 /mnt/multimascon/MultiMascon/main.py', shell=True)
         flash('ソフトリセットが完了しました')
 

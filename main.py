@@ -120,7 +120,7 @@ def button():
     
     elif request.method == 'POST':        
         if request.form['mode'] == 'del':
-            assign_id = int(request.form['assign_id'])
+            assign_id = int(request.form['button_assign_id'])
             if assign_id >= 0:
                 DB.deleteButton(str(assign_id))
         elif request.form['mode'] == 'save':

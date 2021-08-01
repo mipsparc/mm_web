@@ -4,9 +4,13 @@
 <div>
     <h3>現在のUSBデバイス(マスコン以外も含む)接続状況</h3>
     <ul>
-        {% for port in ports %}
-        <li>ポート{{ port|e }}</li>
-        {% endfor %}
+        {% if ports|length > 0 %}
+            {% for port in ports %}
+                <li>ポート{{ port|e }}</li>
+            {% endfor %}
+        {% else %}
+            <li>なし</li>
+        {% endif %}
     </ul>
     
     <h3>車両とマスコンの紐づけ</h3>
@@ -17,6 +21,7 @@
         <img src="/static/usb_hub.jpg" height="200px">
     </div>
     <p>マスコン物理ポートはほかの車両と重複できません。</p>
+    <p>割付変更後は、お手数ですが<a href="/softreset">ソフト再起動</a>をお願いします。</p>
     <ul style="list-style:none;">
         {% for mascon in mascons %}
         <li style="background-color:#ffe8ff;margin-top:30px;max-width:500px;padding:10px;">

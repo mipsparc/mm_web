@@ -23,8 +23,7 @@
                         {% endfor %}
                     </select>
                 </label><br>
-                <label>ファンクションIDまたはアドレス: <input type="number" name="send_key" pattern="[0-9]+" value="{{ button.send_key|e }}" required></label><br>
-                <label>送信データ(ON/OFFの場合は0を入力): <input type="number" name="send_value" pattern="[0-9]+" value="{{ button.send_value|e }}" required></label><br>
+                <label>ファンクションIDまたはアクセサリアドレス: <input type="number" name="send_key" pattern="[0-9]+" value="{{ button.send_key|e }}" required></label><br>
 
                 <button type="submit" name="mode" value="save">保存</button>
                 {% if not button.isnew %}

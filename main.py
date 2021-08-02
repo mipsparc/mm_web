@@ -129,15 +129,14 @@ def button():
             button_id = int(request.form['button_id'])
             assign_type = int(request.form['assign_type'])
             send_key = int(request.form['send_key'])
-            send_value = int(request.form['send_value'])
             
             p = re.compile('([0-9]+/?){1,8}')
             if p.fullmatch(mascon_pos) is not None and button_id in Button.BUTTONS.keys() \
-                and assign_type in Button.ASSIGN_TYPES.keys() and send_key >= 0 and send_value >= 0:
+                and assign_type in Button.ASSIGN_TYPES.keys() and send_key >= 0:
                 if assign_id < 0:
-                    DB.upsertButton(str(mascon_pos), str(button_id), str(assign_type), str(send_key), send_value)
+                    DB.upsertButton(str(mascon_pos), str(button_id), str(assign_type), str(send_key))
                 else:
-                    DB.updateButton(str(assign_id), str(mascon_pos), str(button_id), str(assign_type), str(send_key), send_value)
+                    DB.updateButton(str(assign_id), str(mascon_pos), str(button_id), str(assign_type), str(send_key))
                 
         return redirect(url_for('button'))
 

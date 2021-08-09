@@ -11,8 +11,10 @@ import time
 import pyudev
 from Chart import Chart
 import sys
+# MultiMasconからもimportする
 sys.path.append(os.path.join(os.path.dirname(__file__), '../MultiMascon/'))
 from Button import Button
+from DSAir2 import DSAir2
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -26,7 +28,12 @@ if israspi.is_raspi:
 
 @app.route("/")
 def menu():
-    return render_template('menu.html', version=version.VERSION, menu=True)
+    # データベーススキーマのバージョン
+    current_version = DB.getSchemeVersion()
+    if version.SCHEME_VERSION != current_version:
+        flash('設定ファイルバージョンとファームウェアバージョンに差異があります。両方とも最新にしてください')
+
+    return render_template('menu.html', version=version.VERSION)
 
 @app.route("/loco", methods=['GET', 'POST'])
 def loco():
@@ -42,7 +49,11 @@ def loco():
             if loco_id >= 0:
                 DB.deleteLoco(str(loco_id))
         elif request.form['mode'] == 'save':
-            loco_id = int(request.form['loco_id'])
+            loco_id = request.form['loco_id']
+            if not loco_id.isdecimal():
+                loco_id = -1
+            else:
+                loco_id = int(loco_id)
             address = int(request.form['address'])
             accel_curve_group_id = int(request.form['accel_curve_group_id'])
             speed_curve_group_id = int(request.form['speed_curve_group_id'])
@@ -53,7 +64,7 @@ def loco():
             
             # 条件はしっかり
             if address > 0 and accel_curve_group_id > 0 and speed_curve_group_id > 0 \
-                and base_level >= 0 and light_func_id >= 0 and brake_ratio > 0:
+                and base_level >= 0 and light_func_id >= 0 and brake_ratio > 0 and len(nickname) > 0:
                 if loco_id < 0:
                     DB.insertLoco(str(address), str(accel_curve_group_id), str(speed_curve_group_id), str(base_level), str(light_func_id), nickname, str(brake_ratio))
                 else:
@@ -102,6 +113,7 @@ def mascon():
                 if mascon_assign_id < 0:
                     DB.upsertMasconPos(str(loco_id), mascon_pos)
                 # すでにレコードがある場合は、それを上書きする
+                # TODO このコードいるのか?
                 elif DB.isMasconAssignIdExist(str(mascon_assign_id)) is not None:
                     DB.updateMasconPos(str(mascon_assign_id), str(loco_id), mascon_pos)
                 
@@ -261,8 +273,8 @@ def database():
         if len(blob) < 100:
             return redirect(url_for('database'))
         
-        open(DATABASE_FILENAME, mode='wb').write(blob)
-        flash('設定情報復元が完了しました')
+        Popen('sleep 3; reboot', shell=True)
+        flash('再起動を開始しました。起動完了するまで電源ケーブルを抜かないでください')
         return redirect(url_for('database'))
     
 @app.route("/database/multimascon.sqlite3")
@@ -323,3 +335,72 @@ def softreset():
         flash('ソフトリセットが完了しました')
 
         return redirect(url_for('softreset'))
+    
+@app.route("/cv", methods=['GET', 'POST'])
+def cv():
+    if request.method == 'GET':
+        cv_number = request.args.get('cv_number') or ''
+        result_text = request.args.get('result_text') or ''
+        
+        try:
+            cv_number = int(cv_number)
+        except:
+            cv_number = ''
+        return render_template('cv.html', cv_number=cv_number, result_text=result_text, version=version.VERSION)
+    
+    elif request.method == 'POST':
+        mode = request.form['mode']
+        cv_number = request.form['cv_number']
+        try:
+            cv_number = int(cv_number)
+            if cv_number < 0 or 1023 < cv_number:
+                raise ValueError
+        except:
+            flash('CV番号が不正です')
+            return redirect(url_for('cv'))
+        
+        if mode != 'read' and mode != 'write':
+            return redirect(url_for('cv'))
+        
+        if mode == 'write':
+            cv_value = request.form['cv_value']
+            try:
+                cv_value = int(cv_value)
+                if cv_value < 0 or 255 < cv_value:
+                    raise ValueError
+            except:
+                flash('CV値が不正です')
+                return redirect(url_for('cv', cv_number=cv_number))
+        
+        run('pkill -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
+        time.sleep(1)
+
+        try:
+            dsair = DSAir2('/dev/ttyUSB0', None)
+        except:
+            flash('DSAir2との接続に失敗しました')
+            return redirect(url_for('cv', cv_number=cv_number))
+        
+        max_wait_time = time.time() + 7
+        if mode == 'read':
+            dsair.send(f'getLocoConfig(49152,{cv_number})')
+            read_value = ''
+            while time.time() < max_wait_time:
+                read_value = dsair.read().decode('ascii')
+                if read_value.startswith('@CV,'):
+                    break
+            if read_value == '':
+                flash('CV値読み込みに失敗しました')
+                return redirect(url_for('cv', cv_number=cv_number))
+            else:
+                read_cv_result = read_value.split(',')
+                if len(read_cv_result) <= 3 or (not read_cv_result[3].isdecimal()):
+                    flash('CV値読み込みに失敗しました')
+                    return redirect(url_for('cv', cv_number=cv_number))
+                read_cv_value = read_cv_result[3]
+                return redirect(url_for('cv', cv_number=cv_number, result_text=f'読み出し成功 CV{cv_number}: {read_cv_value}'))
+
+        else:
+            dsair.send(f'setLocoConfig(49152,{cv_number},{cv_value})')
+            time.sleep(3)
+            return redirect(url_for('cv', cv_number=cv_number, result_text=f'CV{cv_number}: {cv_value} を書き込みました(検証はしていません)'))

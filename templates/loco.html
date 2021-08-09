@@ -1,31 +1,50 @@
 {% extends "template.html" %}
 {% block content %}
 <h2>車両設定</h2>
-<div>
-    <p>ここで設定した車両番号(DCCアドレスではありません)により、<a href="/mascon">こちらの画面で対応するマスコンを割付け</a>ます。</p>
-    <p><a href="/accel_speed">加速曲線編集画面</a> / <a href="/output_speed">出力曲線編集画面</a>
-    <ul style="list-style:none;">
-        {% for loco in locos %}
-        <li style="background-color:#ffe8ff;margin-top:30px;max-width:500px;padding:10px;">
-            <form method="post">
-                {% if not loco.isnew %}
-                    車両番号(自動付番): {{ loco.loco_id|e }}<br>
-                {% endif %}
-                <input type="hidden" name="loco_id" value="{{ loco.loco_id|e }}">
-                <label>アドレス: <input type="number" name="address" size="8"  value="{{ loco.address|e }}" required></label><br>
-                <label>加速曲線番号: <input type="number" name="accel_curve_group_id" size="8"  value="{{ loco.accel_curve_group_id|e }}" required></label><br>
-                <label>出力曲線番号: <input type="number" name="speed_curve_group_id" size="8"  value="{{ loco.speed_curve_group_id|e }}" required></label><br>
-                <label>最低出力: <input type="number" name="base_level" size="8" value="{{ loco.base_level|e }}" required></label><br>
-                <label>減速度(例:2.0): <input type="text" name="brake_ratio" size="5" value="{{ loco.brake_ratio|e }}" pattern="[1-9]+[0-9]*\.[0-9]+" required></label><br>
-                <label>ライトファンクションID: <input type="number" name="light_func_id" size="8"  value="{{ loco.light_func_id|e }}" required></label><br>
-                <label>識別名(任意): <input type="text" name="nickname" size="20" value="{{ loco.nickname|e }}" pattern=".{0,20}"></label><br>
-                <button type="submit" name="mode" value="save">保存</button>
-                {% if not loco.isnew %}
-                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
-                {% endif %}
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+<p>ここで設定した車両番号(DCCアドレスではありません)により、<a href="/mascon">マスコンを割付け</a>ます</p>
+{% for loco in locos %}
+<div class="border border-3 d-inline-flex m-2">
+    <form method="post" class="m-2">
+        <input type="hidden" name="loco_id" value="{{ loco.loco_id|e }}">
+        
+        <div class="input-group mb-3">
+            <span class="input-group-text">車両番号</span>
+            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{% if loco.isnew %}(自動付番){% else %}{{ loco.loco_id|e }}{% endif %}" disabled>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">識別名</span>
+            <input type="text" name="nickname" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" size="20" value="{{ loco.nickname|e }}" pattern=".{1,20}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">DCCアドレス</span>
+            <input type="number" name="address" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.address|e }}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">加速曲線番号</span>
+            <input type="number" name="accel_curve_group_id" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.accel_curve_group_id|e }}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">出力曲線番号</span>
+            <input type="number" name="speed_curve_group_id" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.speed_curve_group_id|e }}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">最低出力</span>
+            <input type="number" name="base_level" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.base_level|e }}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">減速度</span>
+            <input type="text" name="brake_ratio" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.brake_ratio|e }}" pattern="[1-9]+[0-9]*\.[0-9]+" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">ライトファンクションID</span>
+            <input type="number" name="light_func_id" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" value="{{ loco.light_func_id|e }}" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" name="mode" value="save">保存</button>
+        {% if not loco.isnew %}
+        <button type="submit" class="btn btn-warning" name="mode" value="del" formnovalidate>削除</button>
+        {% endif %}
+    </form>
 </div>
+{% endfor %}
 {% endblock %}

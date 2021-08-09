@@ -2,15 +2,14 @@
 {% block content %}
 <h2>ファームウェアアップデート</h2>
 <div>
-    <p>この画面では、ファームウェア(MultiMasconのソフトウェア)を更新できます。<br>
-        以下の注意点をお読みになって、正しいファイルを選択して「ファームウェアを更新」ボタンを押してください</p>
-    <ul>
-        <li>再起動と更新は自動的に行われます。完了するまで、安定した電源のある環境で作業してください</li>
-    </ul>
+    <p>この画面では、ファームウェア(MultiMasconのソフトウェア)を更新できます</p>
+    <p>更新と再起動は自動的に行われます。完了(LEDランプが点滅)するまで、安定した電源のある環境で作業してください</p>
     <div style="margin:30px">
         <form method="post" enctype='multipart/form-data'>
-            <input type='file' name='file' required>
-            <input type='submit' value='ファームウェアを更新'>
+            <div class="input-group">
+                <input type="file" name="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
+                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">更新</button>
+            </div>
         </form>
     <div>
 </div>

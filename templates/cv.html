@@ -1,0 +1,28 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>CV(車体・アクセサリ設定値)読み書き画面</h2>
+<div>
+    <p>この画面では、車体やアクセサリの設定値であるCVの読み書きを行います。注意事項をよく読んで実行してください</p>
+    <ul>
+        <li>接続する線路には、読み書きする1両(編成ではありません)または1アクセサリ「だけ」を搭載してください</li>
+        <li>読み書き時にはわずかに車両が動きますので、線路長に気をつけてください</li>
+        <li>CV番号・CV値ともに、先頭に0をつけないでください(例: 01→ 1)</li>
+        <li>重要: CV読み書きが終わったら、ソフト再起動をしてください</li>
+    </ul>
+    <div style="margin:30px">
+        <form method="post" enctype="multipart/form-data">
+            <label><input type="radio" name="mode" value="read" required>CV読み込み</label>
+            <label><input type="radio" name="mode" value="write" required>CV書き込み</label>
+            <br>
+            <label>CV番号<input type="number" name="cv_number" value="{{ cv_number|e }}" required></label>
+            <br>
+            <label>CV値(書き込み時のみ必要)<input type="number" name="cv_value"></label>
+            <br>
+            <input type="submit" value="実行する">
+        </form>
+    <div>
+    <div style="margin:30px">
+        結果: {{ result_text }}
+    </div>
+</div>
+{% endblock %}

@@ -1,36 +1,71 @@
 <!doctype html>
 <html>
 <head>
-    <title>MultiMascon管理画面</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <title>MultiMascon</title>
 </head>
 <body>
-    <div>
-        <a href="/"><img src="/static/logo.png" height="100px"></a>
-        <span>for DSAir2 Ver.{{ version }}<span><br>
-        {% if menu is undefined %}
-        <a href="/">管理画面メニューに戻る</a>
-        {% endif %}
-    </div>
-    <div>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="/static/logo.png" height="110px">
+                <span>Ver.{{ version }}</span>
+            </a>
+            <div class="navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            車両関連操作
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/loco">車両設定</a></li>
+                            <li><a class="dropdown-item" href="/mascon">マスコン割付</a></li>
+                            <li><a class="dropdown-item" href="/accel_speed">加速曲線</a></li>
+                            <li><a class="dropdown-item" href="/output_speed">出力曲線</a></li>
+                            <li><a class="dropdown-item" href="/button">ボタン設定</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/cv">CV値読み書き</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            本体関連操作
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/softreset">ソフト再起動</a></li>
+                            <li><a class="dropdown-item" href="/log">ログ表示</a></li>
+                            <li><a class="dropdown-item" href="/upgrade">ファームウェア更新</a></li>
+                            <li><a class="dropdown-item" href="/database">設定情報</a></li>
+                            <li><a class="dropdown-item" href="/psk">WiFiパスワード変更</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/power">電源操作</a></li>
+                        </ul>
+                    </li>
                 </ul>
-            {% endif %}
-        {% endwith %}
-    </div>
-    <div>
-        {% block content %}
-        {% endblock %}
-        
-        {% if menu is undefined %}
-            <div style="margin:20px">
-                <a href="/">管理画面メニューに戻る</a>
             </div>
-        {% endif %}
+        </div>
+    </nav>
+    <div class="container">
+        <div style="margin:20px">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+        <div style="margin:20px">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+    <script src="/static/bootstrap.min.js"></script>
 </body>
 </html>

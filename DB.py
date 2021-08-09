@@ -15,6 +15,22 @@ class DB:
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
+    
+    #
+    # データベーススキーマバージョン確認
+    #
+    @classmethod
+    def getSchemeVersion(self):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            SELECT version
+            FROM scheme_version
+        ''', ())
+        version = int(cur.fetchone()[0])
+        con.close()
+        
+        return version
 
     #
     # マスコン割付設定画面
@@ -349,7 +365,7 @@ class DB:
         con.row_factory = self.dict_factory
         cur = con.cursor()
         cur.execute('''
-            SELECT button_assign_id, mascon_pos, button_id, assign_type, send_key, send_value
+            SELECT button_assign_id, mascon_pos, button_id, assign_type, send_key
             FROM button_assign
         ''', ())
         button_profile = cur.fetchall()
@@ -369,26 +385,26 @@ class DB:
         con.close()
 
     @classmethod
-    def upsertButton(self, mascon_pos, button_id, assign_type, send_key, send_value):
+    def upsertButton(self, mascon_pos, button_id, assign_type, send_key):
         con = sqlite3.connect(self.dbfile)
         cur = con.cursor()
         cur.execute('''
             INSERT INTO button_assign
-            (mascon_pos, button_id, assign_type, send_key, send_value)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (mascon_pos, button_id, assign_type, send_key, send_value))
+            (mascon_pos, button_id, assign_type, send_key)
+            VALUES (?, ?, ?, ?)
+        ''', (mascon_pos, button_id, assign_type, send_key))
         con.commit()
         con.close()
     
     @classmethod
-    def updateButton(self, assign_id, mascon_pos, button_id, assign_type, send_key, send_value):
+    def updateButton(self, assign_id, mascon_pos, button_id, assign_type, send_key):
         con = sqlite3.connect(self.dbfile)
         cur = con.cursor()
         cur.execute('''
             UPDATE OR IGNORE button_assign
-            SET mascon_pos = ?, button_id = ?, assign_type = ?, send_key = ?, send_value = ?
+            SET mascon_pos = ?, button_id = ?, assign_type = ?, send_key = ?
             WHERE button_assign_id = ?
-        ''', (mascon_pos, button_id, assign_type, send_key, send_value, assign_id))
+        ''', (mascon_pos, button_id, assign_type, send_key, assign_id))
         con.commit()
         con.close()
 

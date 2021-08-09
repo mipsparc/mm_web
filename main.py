@@ -319,7 +319,7 @@ def psk():
             flash('パスワードが不正です。変更が反映されませんでした')
         else:
             run(f'sed -i -e "s/^wpa_passphrase=.*/wpa_passphrase={new_psk}/" /mnt/database/hostapd.conf', shell=True)
-            flash('変更が完了しました。再起動(設定画面からも可能)後に反映されます。')
+            flash('変更が完了しました。再起動後に反映されます。')
 
         return redirect(url_for('psk'))
     

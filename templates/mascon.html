@@ -16,12 +16,9 @@
     <h4>車両とマスコンの紐づけ</h4>
     <p><a href="/loco">車両設定</a>の車両番号(DCCアドレスではありません)に対応するマスコンを割付けます。</p>
     <p>USBで接続された、上に書かれた物理的なポート番号を入力します。たとえば、ポート2であれば「2」、ポート2につながったUSBハブのポート1に繋がっていれば「2/1」と入力します。</p>
-    <p>添付しましたUSBハブは、写真の通り根本からポート1からポート4まで振られています</p>
-    <div class="text-center">
-        <img src="/static/usb_hub.jpg" class="img-fluid">
-    </div>
     <p>マスコン物理ポートはほかの車両と重複できません。</p>
     <p>割付変更後は、お手数ですが<a href="/softreset">ソフト再起動</a>をお願いします。</p>
+    
     {% for mascon in mascons %}
     <div class="border border-3 d-inline-flex m-2">
         <form method="post" class="m-2">
@@ -41,5 +38,10 @@
         </form>
     </div>
     {% endfor %}
+    
+    <p>添付しましたUSBハブは、写真の通り根本からポート1からポート4まで振られています</p>
+    <div class="text-center">
+        <img src="/static/usb_hub.jpg" class="img-fluid">
+    </div>
 </div>
 {% endblock %}

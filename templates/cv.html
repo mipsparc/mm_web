@@ -7,21 +7,33 @@
         <li>接続する線路には、読み書きする1両(編成ではありません)または1アクセサリ「だけ」を搭載してください</li>
         <li>読み書き時にはわずかに車両が動きますので、線路長に気をつけてください</li>
         <li>CV番号・CV値ともに、先頭に0をつけないでください(例: 01→ 1)</li>
-        <li>重要: CV読み書きが終わったら、ソフト再起動をしてください</li>
+        <li><strong>CV読み書きが終わったら、ソフト再起動をしてください</strong></li>
     </ul>
-    <div style="margin:30px">
-        <form method="post" enctype="multipart/form-data">
-            <label><input type="radio" name="mode" value="read" required>CV読み込み</label>
-            <label><input type="radio" name="mode" value="write" required>CV書き込み</label>
-            <br>
-            <label>CV番号<input type="number" name="cv_number" value="{{ cv_number|e }}" required></label>
-            <br>
-            <label>CV値(書き込み時のみ必要)<input type="number" name="cv_value"></label>
-            <br>
-            <input type="submit" value="実行する">
-        </form>
-    <div>
-    <div style="margin:30px">
+    <form method="post" class="m-2">
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" name="mode" type="radio" value="read" checked required>
+                CV読み込み
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" name="mode" type="radio" value="write">
+                CV読み込み
+            </label>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">CV番号</span>
+            <input type="number" class="form-control" name="cv_number" value="{{ cv_number|e }}" required>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">CV値(書き込み時のみ必要)</span>
+            <input type="number" class="form-control" name="cv_value">
+        </div>
+        <input type="submit" class="btn btn-warning" value="実行する">
+    </form>
+    
+    <div class="m-4">
         結果: {{ result_text }}
     </div>
 </div>

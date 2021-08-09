@@ -28,11 +28,11 @@
             <input type="hidden" name="mascon_assign_id" value="{{ mascon.id|e }}">
             <div class="input-group mb-3">
                 <span class="input-group-text">車両番号</span>
-                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="loco_id" pattern="[0-9]+" value="{{ mascon.loco_id|e }}" required>
+                <input type="number" class="form-control" name="loco_id" pattern="[0-9]+" value="{{ mascon.loco_id|e }}" required>
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">マスコン物理ポート(半角入力)</span>
-                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ mascon.mascon_pos|e }}" required>
+                <input type="text" class="form-control" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ mascon.mascon_pos|e }}" required>
             </div>
             <button type="submit" class="btn btn-primary" name="mode" value="save">保存</button>
             {% if not mascon.isnew %}

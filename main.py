@@ -125,10 +125,8 @@ def button():
         buttons = DB.getAllButtons()
         
         # 新規登録用
-        buttons.append({'button_assign_id': -1, 'isnew': True})
-        assign_types = {-1: '選択してください'}
-        assign_types.update(Button.ASSIGN_TYPES)
-        return render_template('button.html', version=version.VERSION, buttons=buttons, button_types=Button.BUTTONS, assign_types=assign_types)
+        buttons.append({'button_assign_id': -1, 'isnew': True, 'assign_types':{-1: '選択してください'}})
+        return render_template('button.html', version=version.VERSION, buttons=buttons, button_types=Button.BUTTONS, assign_types=Button.ASSIGN_TYPES)
     
     elif request.method == 'POST':        
         if request.form['mode'] == 'del':

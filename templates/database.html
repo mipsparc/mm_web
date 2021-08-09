@@ -4,13 +4,13 @@
 <div>
     <p>この画面では、MultiMasconの設定情報を手元にダウンロードしてバックアップできるほか、<br>
         すでに手元にあるバックアップから設定情報を復元することができます</p>
-    <div style="margin:30px">
+    <div class="m-2">
         <h4>ダウンロード</h4>
         <div>
             <span><a href="/database/multimascon.sqlite3">現在の設定情報ダウンロード</a>(ファイル名: multimascon.sqlite3)</span>
         </div>
     </div>
-    <div style="margin:30px">
+    <div class="m-2">
         <h4>復元(注意点あり)</h4>
         <ul>
             <li>DSAir2以外のコントローラ類をすべて取り外した状態で行ってください。</li>
@@ -19,8 +19,8 @@
         </ul>
         <form method="post" enctype='multipart/form-data'>
             <div class="input-group">
-                <input type="file" name="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
-                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">復元</button>
+                <input type="file" name="file" class="form-control" required>
+                <button class="btn btn-outline-secondary" type="submit">復元</button>
             </div>
         </form>
     <div>

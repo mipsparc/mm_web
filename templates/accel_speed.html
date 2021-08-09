@@ -23,9 +23,9 @@
             <input type="hidden" name="curve_group_id" value="{{ curve.curve_group_id|e }}">            
             <div class="input-group m-1">
                 <span class="input-group-text">速度</span>
-                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="speed" pattern="[0-9]+" value="{{ curve.speed|e }}" required>
+                <input type="number" class="form-control" name="speed" pattern="[0-9]+" value="{{ curve.speed|e }}" required>
                 <span class="input-group-text">加速度</span>
-                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="accel" pattern="[0-9]\.[0-9]{1,2}" size="2" placeholder="0.3" value="{{ curve.accel|e }}" required>
+                <input type="text" class="form-control" name="accel" pattern="[0-9]\.[0-9]{1,2}" size="2" placeholder="0.3" value="{{ curve.accel|e }}" required>
             </div>
             <button type="submit" class="btn btn-primary m-1" name="mode" value="save">保存</button>
             {% if not curve.isnew %}

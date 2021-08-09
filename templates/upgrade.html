@@ -4,11 +4,11 @@
 <div>
     <p>この画面では、ファームウェア(MultiMasconのソフトウェア)を更新できます</p>
     <p>更新と再起動は自動的に行われます。完了(LEDランプが点滅)するまで、安定した電源のある環境で作業してください</p>
-    <div style="margin:30px">
+    <div class="m-2">
         <form method="post" enctype='multipart/form-data'>
             <div class="input-group">
-                <input type="file" name="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
-                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">更新</button>
+                <input type="file" name="file" class="form-control" required>
+                <button class="btn btn-outline-secondary" type="submit">更新</button>
             </div>
         </form>
     <div>

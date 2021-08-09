@@ -3,11 +3,12 @@
 <h2>WiFiパスワード(PSK)変更</h2>
 <div>
     <p>この画面では、管理画面WiFiのパスワード(PSK)の変更ができます</p>
-    <div style="margin:30px">
-        <form method="post" enctype='multipart/form-data'>
-            <label>新しいパスワード(8文字以上、英数字に限ります) <input type='text' name='psk' pattern='[a-zA-Z0-9]{8,62}' size='30' required></label>
-            <input type='submit' value='変更する'>
-        </form>
-    <div>
+    <form method="post" class="m-2">
+        <div class="input-group mb-3">
+            <span class="input-group-text">新しいパスワード(8文字以上、英数字に限ります)</span>
+            <input class="form-control" type="text"  name="psk" pattern="[a-zA-Z0-9]{8,62}" size="30" required>
+        </div>
+        <input type="submit" class="btn btn-warning" value="変更する">
+    </form>
 </div>
 {% endblock %}

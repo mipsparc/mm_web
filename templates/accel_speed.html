@@ -4,35 +4,40 @@
 <div>
     <p>ここでは、どの速度のときにどの程度加速するかを設定・確認できます。</p>
     
-    <div>
-        <form method="post">
-            <button type="submit" name="mode" value="new">加速曲線を新規作成する</button>
-        </form>
-    </div>
+    <form method="post">
+        <div class="d-grid gap-2 col-6 mx-auto m-2">
+            <button type="submit" class="btn btn-primary" name="mode" value="new">加速曲線を新規作成</button>
+        </div>
+    </form>
     
     {% for curve_group_id, curve_group in curve_groups.items() %}
-    <ul style="background-color:#ffe8ff;list-style:none;padding:10px;max-width:600px">
-        <p>加速曲線番号{{ curve_group_id|e }}
-        <form method="post">
+    <div class="border border-3 d-inline-flex flex-column m-2">
+        <form method="post" class="row m-2">
             <input type="hidden" name="curve_group_id" value="{{ curve_group_id|e }}">
-            <button type="submit" name="mode" value="delGroup" onclick="return confirm('本当に削除しますか')">加速曲線を削除する</button>
+            <h4>加速曲線{{ curve_group_id|e }}</h4>
+            <button type="submit" class="btn btn btn-outline-danger" name="mode" value="delGroup" onclick="return confirm('本当に削除しますか')">加速曲線を削除する</button>
         </form>
         {% for curve in curve_group %}
-        <li>
-            <form method="post">
-                <input type="hidden" name="curve_id" value="{{ curve.curve_id|e }}">
-                <input type="hidden" name="curve_group_id" value="{{ curve.curve_group_id|e }}">
-                <label>速度: <input type="number" name="speed" pattern="[0-9]+" value="{{ curve.speed|e }}" required></label>
-                <label style="padding-left:20px;">加速度(例:0.3): <input type="text" name="accel" pattern="[0-9]\.[0-9]{1,2}" size="5"  value="{{ curve.accel|e }}" required></label>
-                <button type="submit" name="mode" value="save">保存</button>
-                {% if not curve.isnew %}
-                <button type="submit" name="mode" value="del" formnovalidate>削除</button>
-                {% endif %}
-            </form>
-        </li>
+        <form method="post" class="m-2">
+            <input type="hidden" name="curve_id" value="{{ curve.curve_id|e }}">
+            <input type="hidden" name="curve_group_id" value="{{ curve.curve_group_id|e }}">            
+            <div class="input-group m-1">
+                <span class="input-group-text">速度</span>
+                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="speed" pattern="[0-9]+" value="{{ curve.speed|e }}" required>
+                <span class="input-group-text">加速度</span>
+                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="accel" pattern="[0-9]\.[0-9]{1,2}" size="2" placeholder="0.3" value="{{ curve.accel|e }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary m-1" name="mode" value="save">保存</button>
+            {% if not curve.isnew %}
+            <button type="submit" class="btn btn-warning m-1" name="mode" value="del" formnovalidate>削除</button>
+            {% endif %}
+        </form>
         {% endfor %}
-    </ul>
+    </div>
     {% endfor %}
-    {{ chart_img | safe }}
+    
+    <div class="chart_svg text-center m-2">
+        {{ chart_img | safe }}
+    </div>
 </div>
 {% endblock %}

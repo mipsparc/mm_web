@@ -96,8 +96,10 @@ def mascon():
     
         mascon_assigns = DB.getAllMasconPos()
         # 新規登録用
-        mascon_assigns.append({'id': -1, 'loco_id': '', 'mascon_pos': '', 'isnew': True})
-        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns, ports=list(set(ports)))
+        mascon_assigns.append({'id': -1, 'isnew': True})
+        
+        nicknames = DB.getAllNicknames()
+        return render_template('mascon.html', version=version.VERSION, mascons=mascon_assigns, nicknames=nicknames, ports=list(set(ports)))
     
     elif request.method == 'POST':
         if request.form['mode'] == 'del':

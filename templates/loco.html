@@ -1,16 +1,11 @@
 {% extends "template.html" %}
 {% block content %}
 <h2>車両設定</h2>
-<p>ここで設定した車両番号(DCCアドレスではありません)により、<a href="/mascon">マスコンを割付け</a>ます</p>
+<p>ここで設定した識別名により<a href="/mascon">マスコンを割付け</a>ます</p>
 {% for loco in locos %}
 <div class="border border-3 d-inline-flex m-2">
     <form method="post" class="m-2">
         <input type="hidden" name="loco_id" value="{{ loco.loco_id|e }}">
-        
-        <div class="input-group mb-3">
-            <span class="input-group-text">車両番号</span>
-            <input type="text" class="form-control" value="{% if loco.isnew %}(自動付番){% else %}{{ loco.loco_id|e }}{% endif %}" disabled>
-        </div>
         <div class="input-group mb-3">
             <span class="input-group-text">識別名</span>
             <input type="text" name="nickname" class="form-control" size="20" value="{{ loco.nickname|e }}" pattern=".{1,20}" required>

@@ -42,14 +42,30 @@ class DB:
         con.row_factory = self.dict_factory
         cur = con.cursor()
         cur.execute('''
-            SELECT id, loco_id, mascon_pos
+            SELECT id, loco_id, nickname, mascon_pos
             FROM mascon_assign
+            JOIN loco USING (loco_id)
             ORDER BY loco_id ASC
         ''', ())
         mascon_assigns = cur.fetchall()
         con.close()
         
         return mascon_assigns
+    
+    @classmethod
+    def getAllNicknames(self):
+        con = sqlite3.connect(self.dbfile)
+        con.row_factory = self.dict_factory
+        cur = con.cursor()
+        cur.execute('''
+            SELECT loco_id, nickname
+            FROM loco
+            ORDER BY loco_id ASC
+        ''', ())
+        nicknames = cur.fetchall()
+        con.close()
+        
+        return nicknames
     
     # 単に削除する
     @classmethod

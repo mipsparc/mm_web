@@ -14,7 +14,6 @@
     </ul>
     
     <h4>車両とマスコンの紐づけ</h4>
-    <p><a href="/loco">車両設定</a>の車両番号(DCCアドレスではありません)に対応するマスコンを割付けます。</p>
     <p>USBで接続された、上に書かれた物理的なポート番号を入力します。たとえば、ポート2であれば「2」、ポート2につながったUSBハブのポート1に繋がっていれば「2/1」と入力します。</p>
     <p>マスコン物理ポートはほかの車両と重複できません。</p>
     <p>割付変更後は、お手数ですが<a href="/softreset">ソフト再起動</a>をお願いします。</p>
@@ -22,11 +21,16 @@
     {% for mascon in mascons %}
     <div class="border border-3 d-inline-flex m-2">
         <form method="post" class="m-2">
-            <input type="hidden" name="mascon_assign_id" value="{{ mascon.id|e }}">
+            <input type="hidden" name="mascon_assign_id" value="{{ mascon.id|e }}">            
             <div class="input-group mb-3">
-                <span class="input-group-text">車両番号</span>
-                <input type="number" class="form-control" name="loco_id" value="{{ mascon.loco_id|e }}" required>
+                <label class="input-group-text">識別名</label>
+                <select class="form-select" name="loco_id">
+                {% for nickname in nicknames %}
+                    <option value="{{ nickname.loco_id|e }}" {% if nickname.loco_id == mascon.loco_id %}selected{% endif %}>{{ nickname.nickname|e }}</option>、
+                {% endfor %}
+                </select>
             </div>
+            
             <div class="input-group mb-3">
                 <span class="input-group-text">マスコン物理ポート(半角入力)</span>
                 <input type="text" class="form-control" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ mascon.mascon_pos|e }}" required>

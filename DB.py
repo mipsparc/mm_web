@@ -44,7 +44,7 @@ class DB:
         cur.execute('''
             SELECT id, loco_id, nickname, mascon_pos
             FROM mascon_assign
-            JOIN loco USING (loco_id)
+            LEFT JOIN loco USING (loco_id)
             ORDER BY loco_id ASC
         ''', ())
         mascon_assigns = cur.fetchall()

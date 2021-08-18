@@ -26,8 +26,11 @@
                 <label class="input-group-text">識別名</label>
                 <select class="form-select" name="loco_id">
                 {% for nickname in nicknames %}
-                    <option value="{{ nickname.loco_id|e }}" {% if nickname.loco_id == mascon.loco_id %}selected{% endif %}>{{ nickname.nickname|e }}</option>、
+                    <option value="{{ nickname.loco_id|e }}" {% if nickname.loco_id == mascon.loco_id %}selected{% endif %}>{{ nickname.nickname|e }}</option>
                 {% endfor %}
+                {% if mascon.nickname == None %}
+                    <option selected disabled>(車両が削除されました)</option>
+                {% endif %}
                 </select>
             </div>
             

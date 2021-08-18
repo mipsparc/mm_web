@@ -15,6 +15,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../MultiMascon/'))
 from Button import Button
 from DSAir2 import DSAir2
+from Keyboard import Keyboard
 
 app = Flask(__name__)
 # アプライアンスのため固定鍵とする。セキュリティは必要とされない。
@@ -130,7 +131,7 @@ def button():
         buttons.append({'button_assign_id': -1, 'isnew': True, 'assign_types':{-1: '選択してください'}})
         return render_template('button.html', version=version.VERSION, buttons=buttons, button_types=Button.BUTTONS, assign_types=Button.ASSIGN_TYPES)
     
-    elif request.method == 'POST':        
+    elif request.method == 'POST':
         if request.form['mode'] == 'del':
             assign_id = int(request.form['button_assign_id'])
             if assign_id >= 0:
@@ -151,6 +152,51 @@ def button():
                     DB.updateButton(str(assign_id), str(mascon_pos), str(button_id), str(assign_type), str(send_key))
                 
         return redirect(url_for('button'))
+
+@app.route("/keyboard", methods=['GET', 'POST'])
+def keyboard():
+    if request.method == 'GET':
+        # デフォルト値を設定
+        loco_keyboards = {}
+        for scan_key in Keyboard.SCAN_CODES_LOCO:
+            loco_keyboards[scan_key] = {'keyboard_assign_id': -1, 'key_code': scan_key, 'num': ''}
+        loco_keyboards.update(DB.getKeyboards(str(Keyboard.ASSIGN_TYPE_LOCO), ''))
+        loco_keyboards = list(loco_keyboards.values())
+        
+        normal_keyboards = DB.getKeyboards(str(Keyboard.ASSIGN_TYPE_FUNC), str(Keyboard.ASSIGN_TYPE_ACCESSORY))
+        normal_keyboards[999] = {'keyboard_assign_id': -1, 'isnew': True}
+
+        return render_template('keyboard.html', version=version.VERSION, loco_keyboards=loco_keyboards, normal_keyboards=normal_keyboards, loco_key=Keyboard.SCAN_CODES_LOCO, normal_key=Keyboard.SCAN_CODES_NORMAL)
+    
+    elif request.method == 'POST':
+        if request.form['mode'] == 'del':
+            assign_id = int(request.form['keyboard_assign_id'])
+            DB.deleteKeyboard(str(assign_id))
+        elif request.form['mode'] == 'save':
+            assign_id = int(request.form['keyboard_assign_id'])
+            key_code = int(request.form['key_code'])
+            assign_type = ''
+            if request.form['type'] == 'loco_key':
+                assign_type = Keyboard.ASSIGN_TYPE_LOCO
+                # DCCアドレス
+                num = int(request.form['loco_addr'])
+            else:
+                # ファンクションID / アクセサリアドレス
+                num = int(request.form['num'])
+                
+                if request.form['type'] == 'func':
+                    assign_type = Keyboard.ASSIGN_TYPE_FUNC
+                elif request.form['type'] == 'accessory':
+                    assign_type = Keyboard.ASSIGN_TYPE_ACCESSORY
+            
+            if assign_type != '' and num >= 0 \
+                and (key_code in Keyboard.SCAN_CODES_LOCO or key_code in Keyboard.SCAN_CODES_NORMAL):
+                if assign_id < 0:
+                    DB.upsertKeyboard(str(assign_type), str(key_code), str(num))
+                else:
+                    DB.updateKeyboard(str(assign_id), str(assign_type), str(key_code), str(num))
+                
+        return redirect(url_for('keyboard'))
 
 @app.route("/accel_speed", methods=['GET', 'POST'])
 def accel_speed():
@@ -273,8 +319,9 @@ def database():
         if len(blob) < 100:
             return redirect(url_for('database'))
         
-        Popen('sleep 3; reboot', shell=True)
-        flash('再起動を開始しました。起動完了するまで電源ケーブルを抜かないでください')
+        run('pkill -f "/mnt/multimascon/MultiMascon/main.py"', shell=True)
+        Popen('python3 /mnt/multimascon/MultiMascon/main.py', shell=True)
+        flash('設定情報を更新しました')
         return redirect(url_for('database'))
     
 @app.route("/database/multimascon.sqlite3")

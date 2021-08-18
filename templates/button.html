@@ -6,7 +6,7 @@
     {% for button in buttons %}
     <div class="border border-3 d-inline-flex m-2">
         <form method="post">
-            <input type="hidden" name="button_assign_id" value="{{ button.button_assign_id|e }}">            
+            <input type="hidden" name="button_assign_id" value="{{ button.button_assign_id|e }}">
             <div class="input-group mb-3">
                 <span class="input-group-text">マスコン物理ポート(半角入力)</span>
                 <input type="text" class="form-control" name="mascon_pos" pattern="([0-9]+/?){1,8}" size="8"  value="{{ button.mascon_pos|e }}" required>
@@ -32,7 +32,7 @@
             
             <div class="input-group mb-3">
                 <span class="input-group-text">ファンクションID / アクセサリアドレス</span>
-                <input type="number" class="form-control" name="send_key" pattern="[0-9]+" value="{{ button.send_key|e }}" required>
+                <input type="number" class="form-control" name="send_key" min="0" value="{{ button.send_key|e }}" required>
             </div>
 
             <button type="submit" class="btn btn-primary" name="mode" value="save">保存</button>

@@ -28,7 +28,7 @@
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text">減速度</span>
-            <input type="text" name="brake_ratio" class="form-control" value="{{ loco.brake_ratio|e }}" pattern="[1-9]+[0-9]*\.[0-9]+" required>
+            <input type="text" name="brake_ratio" class="form-control" value="{{ loco.brake_ratio|e }}" step="0.1" min="0.1" required>
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text">ライトファンクションID</span>

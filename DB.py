@@ -424,3 +424,65 @@ class DB:
         con.commit()
         con.close()
 
+    #
+    # キーボード編集画面
+    #
+    @classmethod
+    def getKeyboards(self, assign_type1, assign_type2):
+        con = sqlite3.connect(self.dbfile)
+        con.row_factory = self.dict_factory
+        cur = con.cursor()
+        cur.execute('''
+            SELECT keyboard_assign_id, assign_type, key_code, num
+            FROM keyboard_assign
+            WHERE assign_type = ?
+            OR assign_type = ?
+        ''', (assign_type1, assign_type2))
+        keyboards = cur.fetchall()
+        con.close()
+        
+        # key_codeをキーにする
+        output = {}
+        for keyboard in keyboards:
+            output[int(keyboard['key_code'])] = keyboard
+        
+        return output
+    
+    @classmethod
+    def deleteKeyboard(self, assign_id):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            DELETE FROM keyboard_assign
+            WHERE keyboard_assign_id = ?
+        ''', (assign_id, ))
+        con.commit()
+        con.close()
+        
+    @classmethod
+    def upsertKeyboard(self, assign_type, key_code, num):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            INSERT INTO keyboard_assign
+            (assign_type, key_code, num)
+            VALUES (?, ?, ?)
+            ON CONFLICT (key_code)
+            DO UPDATE
+            SET num = excluded.num
+        ''', (assign_type, key_code, num))
+        con.commit()
+        con.close()
+        
+    @classmethod
+    def updateKeyboard(self, assign_id, assign_type, key_code, num):
+        con = sqlite3.connect(self.dbfile)
+        cur = con.cursor()
+        cur.execute('''
+            UPDATE OR IGNORE keyboard_assign
+            SET assign_type = ?, key_code = ?, num = ?
+            WHERE keyboard_assign_id = ?
+        ''', (assign_type, key_code, num, assign_id))
+        con.commit()
+        con.close()
+

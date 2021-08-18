@@ -1,0 +1,73 @@
+{% extends "template.html" %}
+{% block content %}
+<h2>キーボード設定</h2>
+<div>
+    <p>キーボードの各キーに機能を割り付けます</p>
+    
+    <h4>車両割付</h4>
+    {% for keyboard in loco_keyboards %}
+    <div class="border border-3 d-inline-flex m-2">
+        <form method="post">
+            <input type="hidden" name="keyboard_assign_id" value="{{ keyboard.keyboard_assign_id|e }}">
+            <input type="hidden" name="type" value="loco_key">
+            
+            <input type="hidden" name="key_code" value="{{ keyboard.key_code|e }}">
+            <div class="input-group mt-2">
+                <span class="input-group-text">キー名</span>
+                <input type="text" class="form-control" value="{{ loco_key[keyboard.key_code]|e }}" size="5" disabled>
+            </div>
+            
+            <div class="input-group mb-2">
+                <span class="input-group-text">DCCアドレス</span>
+                <input type="number" class="form-control" name="loco_addr" value="{{ keyboard.num|e }}" style="width: 5rem" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="mode" value="save">保存</button>
+        </form>
+    </div>
+    {% endfor %}
+    
+    <h4 class="mt-3">キー役割割付け</h4>
+    {% for keyboard in normal_keyboards.values() %}
+    <div class="border border-3 d-inline-flex m-2">
+        <form method="post">
+            <input type="hidden" name="keyboard_assign_id" value="{{ keyboard.keyboard_assign_id|e }}">
+        
+            <div class="input-group mt-2">
+                <label class="input-group-text">キー</label>
+                <select class="form-select" name="key_code">
+                {% for key_code, char in normal_key.items() %}
+                    <option value="{{ key_code|e }}" {% if key_code == keyboard.key_code %}selected{% endif %}>{{ char|e }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-check form-check-inline m-2">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="type" value="func" {% if keyboard.assign_type == 2 %}checked{% endif %} required>
+                    ファンクション
+                </label>
+            </div>
+            
+            <div class="form-check form-check-inline m-2">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="type" value="accessory" {% if keyboard.assign_type == 3 %}checked{% endif %}>
+                    アクセサリ
+                </label>
+            </div>
+            
+            <div class="input-group mb-2">
+                <span class="input-group-text">ファンクションID / アクセサリアドレス</span>
+                <input type="number" class="form-control" name="num" min="0" value="{{ keyboard.num|e }}" style="width: 5rem" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="mode" value="save">保存</button>
+            {% if not keyboard.isnew %}
+            <button type="submit" class="btn btn-warning" name="mode" value="del" formnovalidate>削除</button>
+            {% endif %}
+        </form>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}
